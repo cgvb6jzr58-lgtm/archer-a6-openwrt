@@ -1,4 +1,4 @@
-name: Build OpenWrt Archer A6
+name: Debug OpenWrt Archer A6
 
 on:
   workflow_dispatch:
@@ -14,18 +14,18 @@ jobs:
           wget https://downloads.openwrt.org/releases/23.05.5/targets/ath79/generic/openwrt-imagebuilder-23.05.5-ath79-generic.Linux-x86_64.tar.xz
           tar -xf openwrt-imagebuilder-23.05.5-ath79-generic.Linux-x86_64.tar.xz
 
-      - name: Build firmware
+      - name: Build firmware verbose
         run: |
           cd openwrt-imagebuilder-23.05.5-ath79-generic.Linux-x86_64
-          make image PROFILE="tplink_archer-c6-v2" PACKAGES="luci luci-ssl pbr luci-app-pbr dnsmasq-full -dnsmasq ca-bundle curl nano ip-full"
+          make image \
+          PROFILE="tplink_archer-c6-v2" \
+          PACKAGES="luci luci-ssl pbr luci-app-pbr dnsmasq-full -dnsmasq ca-bundle curl nano ip-full" \
+          V=s
 
-      - name: Find firmware
+      - name: Check output
         run: |
-          find . -name "*squashfs-sysupgrade.bin"
+          echo "=== TARGET FILES ==="
+          find openwrt-imagebuilder-23.05.5-ath79-generic.Linux-x86_64/bin/targets/ath79/generic -type f || true
 
-      - name: Upload firmware
-        uses: actions/upload-artifact@v4
-        with:
-          name: Archer-A6-OpenWrt
-          path: |
-            **/*squashfs-sysupgrade.bin
+          echo "=== TMP FILES ==="
+          find openwrt-imagebuilder-23.05.5-ath79-generic.Linux-x86_64/build_dir -type f | grep -E "sysupgrade|factory|bin" || true
