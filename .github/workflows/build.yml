@@ -1,4 +1,3 @@
-YAML
 name: Build OpenWrt Archer A6
 
 on:
