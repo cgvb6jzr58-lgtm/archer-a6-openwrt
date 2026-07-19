@@ -20,55 +20,7 @@ jobs:
           unzip Xray-linux-32.zip
           mkdir -p files/usr/bin
           cp xray files/usr/bin/xray
-          chmod +x files/usr/bin/xray
-
-      - name: Create Xray config
-        run: |
-          mkdir -p files/etc/xray
-
-          cat > files/etc/xray/config.json <<'EOF'
-{
-  "inbounds": [
-    {
-      "port": 10808,
-      "protocol": "socks",
-      "settings": {
-        "udp": true
-      }
-    }
-  ],
-  "outbounds": [
-    {
-      "protocol": "vless",
-      "settings": {
-        "vnext": [
-          {
-            "address": "142.91.106.23",
-            "port": 43000,
-            "users": [
-              {
-                "id": "e77b20f5-2395-434b-974d-9b6402fa26b9",
-                "encryption": "none",
-                "flow": "xtls-rprx-vision"
-              }
-            ]
-          }
-        ]
-      },
-      "streamSettings": {
-        "network": "tcp",
-        "security": "reality",
-        "realitySettings": {
-          "serverName": "",
-          "fingerprint": "chrome",
-          "publicKey": "15XOpMnOR85wfLavCT1DCQq_OIQtvR8EsspZ4tKWAHc",
-          "shortId": "9dd01ce"
-        }
-      }
-    }
-  ]
-}
-EOF
+          chmod 755 files/usr/bin/xray
 
       - name: Build firmware
         run: |
@@ -79,10 +31,14 @@ EOF
           PACKAGES="pbr kmod-tun iptables-nft ip-full ca-bundle" \
           FILES="../files"
 
+      - name: Find firmware
+        run: |
+          find . -name "*sysupgrade.bin"
+
       - name: Prepare firmware
         run: |
           mkdir output
-          find . -name "*squashfs-sysupgrade.bin" -exec cp {} output/ \;
+          find . -name "*sysupgrade.bin" -exec cp {} output/ \;
           ls -lh output
 
       - name: Upload firmware
