@@ -19,14 +19,14 @@ jobs:
           cd openwrt-imagebuilder-23.05.5-ath79-generic.Linux-x86_64
           make image PROFILE="tplink_archer-c6-v2" PACKAGES="luci luci-ssl xray-core pbr luci-app-pbr dnsmasq-full -dnsmasq ca-bundle curl nano ip-full"
 
-      - name: Find firmware
+      - name: Copy firmware
         run: |
-          echo "Searching firmware..."
-          find . -name "*squashfs-sysupgrade.bin"
+          mkdir firmware
+          find . -name "*squashfs-sysupgrade.bin" -exec cp {} firmware/ \;
+          ls -lh firmware
 
       - name: Upload firmware
         uses: actions/upload-artifact@v4
         with:
           name: Archer-A6-OpenWrt
-          path: |
-            **/*squashfs-sysupgrade.bin
+          path: firmware/
