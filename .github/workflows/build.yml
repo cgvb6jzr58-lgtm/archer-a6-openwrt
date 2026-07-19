@@ -1,4 +1,4 @@
-name: Build OpenWrt Archer A6 VLESS Minimal
+name: Build OpenWrt Archer A6 VLESS Base
 
 on:
   workflow_dispatch:
@@ -20,12 +20,7 @@ jobs:
 
           make image \
           PROFILE="tplink_archer-c6-v2" \
-          PACKAGES="xray-core pbr dnsmasq-full ca-bundle kmod-tun iptables-nft ip-full"
-
-      - name: Check image
-        run: |
-          echo "=== Images ==="
-          find . -name "*sysupgrade*"
+          PACKAGES="pbr kmod-tun iptables-nft ip-full ca-bundle"
 
       - name: Prepare firmware
         run: |
@@ -36,5 +31,5 @@ jobs:
       - name: Upload firmware
         uses: actions/upload-artifact@v4
         with:
-          name: Archer-A6-VLESS-Minimal
+          name: Archer-A6-VLESS-Base
           path: output/
