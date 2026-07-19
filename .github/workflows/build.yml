@@ -1,4 +1,4 @@
-name: Build Archer A6 VLESS
+name: Build Archer A6 VLESS Minimal
 
 on:
   workflow_dispatch:
@@ -14,35 +14,33 @@ jobs:
           wget https://downloads.openwrt.org/releases/23.05.5/targets/ath79/generic/openwrt-imagebuilder-23.05.5-ath79-generic.Linux-x86_64.tar.xz
           tar -xf openwrt-imagebuilder-23.05.5-ath79-generic.Linux-x86_64.tar.xz
 
-      - name: Download Xray
+      - name: Prepare files
         run: |
-          wget https://github.com/XTLS/Xray-core/releases/latest/download/Xray-linux-32.zip
-          unzip Xray-linux-32.zip
           mkdir -p files/usr/bin
+
+          wget https://github.com/XTLS/Xray-core/releases/download/v25.7.26/Xray-linux-mips32-v5.zip
+
+          unzip Xray-linux-mips32-v5.zip
+
           cp xray files/usr/bin/xray
           chmod 755 files/usr/bin/xray
 
-      - name: Build firmware
+      - name: Build
         run: |
           cd openwrt-imagebuilder-23.05.5-ath79-generic.Linux-x86_64
 
           make image \
           PROFILE="tplink_archer-c6-v2" \
-          PACKAGES="pbr kmod-tun iptables-nft ip-full ca-bundle" \
+          PACKAGES="pbr kmod-tun iptables-nft ca-bundle" \
           FILES="../files"
 
       - name: Find firmware
         run: |
           find . -name "*sysupgrade.bin"
 
-      - name: Prepare firmware
-        run: |
-          mkdir output
-          find . -name "*sysupgrade.bin" -exec cp {} output/ \;
-          ls -lh output
-
-      - name: Upload firmware
+      - name: Upload
         uses: actions/upload-artifact@v4
         with:
           name: Archer-A6-VLESS
-          path: output/
+          path: |
+            **/*sysupgrade.bin
