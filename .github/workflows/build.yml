@@ -1,10 +1,10 @@
-name: Check OpenWrt Profiles
+name: Build OpenWrt Archer A6
 
 on:
   workflow_dispatch:
 
 jobs:
-  check:
+  build:
     runs-on: ubuntu-22.04
 
     steps:
@@ -14,7 +14,18 @@ jobs:
           wget https://downloads.openwrt.org/releases/23.05.5/targets/ath79/generic/openwrt-imagebuilder-23.05.5-ath79-generic.Linux-x86_64.tar.xz
           tar -xf openwrt-imagebuilder-23.05.5-ath79-generic.Linux-x86_64.tar.xz
 
-      - name: Show profiles
+      - name: Build firmware
         run: |
           cd openwrt-imagebuilder-23.05.5-ath79-generic.Linux-x86_64
-          make info | grep -i "archer"
+          make image PROFILE="tplink_archer-c6-v2" PACKAGES="luci luci-ssl pbr luci-app-pbr dnsmasq-full -dnsmasq ca-bundle curl nano ip-full"
+
+      - name: Find firmware
+        run: |
+          find . -name "*squashfs-sysupgrade.bin"
+
+      - name: Upload firmware
+        uses: actions/upload-artifact@v4
+        with:
+          name: Archer-A6-OpenWrt
+          path: |
+            **/*squashfs-sysupgrade.bin
