@@ -1,4 +1,4 @@
-name: Build OpenWrt Archer A6 VLESS Base
+name: Build Archer A6 VLESS
 
 on:
   workflow_dispatch:
@@ -14,13 +14,70 @@ jobs:
           wget https://downloads.openwrt.org/releases/23.05.5/targets/ath79/generic/openwrt-imagebuilder-23.05.5-ath79-generic.Linux-x86_64.tar.xz
           tar -xf openwrt-imagebuilder-23.05.5-ath79-generic.Linux-x86_64.tar.xz
 
+      - name: Download Xray
+        run: |
+          wget https://github.com/XTLS/Xray-core/releases/latest/download/Xray-linux-32.zip
+          unzip Xray-linux-32.zip
+          mkdir -p files/usr/bin
+          cp xray files/usr/bin/xray
+          chmod +x files/usr/bin/xray
+
+      - name: Create Xray config
+        run: |
+          mkdir -p files/etc/xray
+
+          cat > files/etc/xray/config.json <<'EOF'
+{
+  "inbounds": [
+    {
+      "port": 10808,
+      "protocol": "socks",
+      "settings": {
+        "udp": true
+      }
+    }
+  ],
+  "outbounds": [
+    {
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "142.91.106.23",
+            "port": 43000,
+            "users": [
+              {
+                "id": "e77b20f5-2395-434b-974d-9b6402fa26b9",
+                "encryption": "none",
+                "flow": "xtls-rprx-vision"
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "tcp",
+        "security": "reality",
+        "realitySettings": {
+          "serverName": "",
+          "fingerprint": "chrome",
+          "publicKey": "15XOpMnOR85wfLavCT1DCQq_OIQtvR8EsspZ4tKWAHc",
+          "shortId": "9dd01ce"
+        }
+      }
+    }
+  ]
+}
+EOF
+
       - name: Build firmware
         run: |
           cd openwrt-imagebuilder-23.05.5-ath79-generic.Linux-x86_64
 
           make image \
           PROFILE="tplink_archer-c6-v2" \
-          PACKAGES="pbr kmod-tun iptables-nft ip-full ca-bundle"
+          PACKAGES="pbr kmod-tun iptables-nft ip-full ca-bundle" \
+          FILES="../files"
 
       - name: Prepare firmware
         run: |
@@ -31,5 +88,5 @@ jobs:
       - name: Upload firmware
         uses: actions/upload-artifact@v4
         with:
-          name: Archer-A6-VLESS-Base
+          name: Archer-A6-VLESS
           path: output/
