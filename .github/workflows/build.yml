@@ -19,14 +19,17 @@ jobs:
           cd openwrt-imagebuilder-23.05.5-ath79-generic.Linux-x86_64
           make image PROFILE="tplink_archer-c6-v2" PACKAGES="luci luci-ssl xray-core pbr luci-app-pbr dnsmasq-full -dnsmasq ca-bundle curl nano ip-full"
 
-      - name: Show generated files
+      - name: Find all output
         run: |
-          echo "Generated firmware files:"
-          find . -type f \( -name "*.bin" -o -name "*.img" \)
+          echo "=== ALL BIN FILES ==="
+          find . -name "*.bin"
 
-      - name: Upload firmware
+          echo "=== TARGET DIRECTORY ==="
+          ls -lah bin/targets/ath79/generic/
+
+      - name: Upload all target files
         uses: actions/upload-artifact@v4
         with:
-          name: Archer-A6-OpenWrt
+          name: Archer-A6-output
           path: |
-            openwrt-imagebuilder-23.05.5-ath79-generic.Linux-x86_64/bin/targets/ath79/generic/*squashfs-sysupgrade.bin
+            openwrt-imagebuilder-23.05.5-ath79-generic.Linux-x86_64/bin/targets/ath79/generic/
