@@ -17,18 +17,23 @@ jobs:
       - name: Build firmware
         run: |
           cd openwrt-imagebuilder-23.05.5-ath79-generic.Linux-x86_64
+          make image PROFILE="tplink_archer-c6-v2" PACKAGES="luci-ssl pbr"
 
-          make image \
-          PROFILE="tplink_archer-c6-v2" \
-          PACKAGES="luci-ssl pbr"
-
-      - name: Check image
+      - name: Search firmware
         run: |
-          find . -name "*.bin" -ls
+          echo "=== SEARCH ==="
+          find . -type f -name "*sysupgrade*"
+          echo "=== TARGET ==="
+          find bin/targets -type f || true
+
+      - name: Prepare firmware
+        run: |
+          mkdir output
+          find . -type f -name "*sysupgrade.bin" -exec cp {} output/ \;
+          ls -lh output
 
       - name: Upload firmware
         uses: actions/upload-artifact@v4
         with:
-          name: Archer-A6-Minimal
-          path: |
-            **/*.bin
+          name: Archer-A6-firmware
+          path: output/
