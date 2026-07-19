@@ -1,4 +1,4 @@
-name: Build OpenWrt Archer A6 Lite
+name: Build OpenWrt Archer A6 Minimal
 
 on:
   workflow_dispatch:
@@ -20,15 +20,15 @@ jobs:
 
           make image \
           PROFILE="tplink_archer-c6-v2" \
-          PACKAGES="luci-ssl xray-core pbr luci-app-pbr dnsmasq-full -dnsmasq"
+          PACKAGES="luci-ssl pbr"
 
-      - name: Find firmware
+      - name: Check image
         run: |
-          find . -name "*squashfs*"
+          find . -name "*.bin" -ls
 
       - name: Upload firmware
         uses: actions/upload-artifact@v4
         with:
-          name: Archer-A6-Lite
+          name: Archer-A6-Minimal
           path: |
-            **/*squashfs*
+            **/*.bin
