@@ -14,45 +14,20 @@ jobs:
           wget https://downloads.openwrt.org/releases/23.05.5/targets/ath79/generic/openwrt-imagebuilder-23.05.5-ath79-generic.Linux-x86_64.tar.xz
           tar -xf openwrt-imagebuilder-23.05.5-ath79-generic.Linux-x86_64.tar.xz
 
-      - name: Download Xray MIPS32
+      - name: Download Xray
         run: |
           wget https://github.com/XTLS/Xray-core/releases/download/v26.3.27/Xray-linux-mips32.zip
           unzip Xray-linux-mips32.zip
-
           mkdir -p files/usr/bin
           cp xray files/usr/bin/xray
           chmod 755 files/usr/bin/xray
 
-      - name: Create init script
-        run: |
-          mkdir -p files/etc/init.d
-
-          cat > files/etc/init.d/xray <<'EOF'
-#!/bin/sh /etc/rc.common
-
-START=99
-
-start() {
-    /usr/bin/xray run -c /etc/xray/config.json &
-}
-
-stop() {
-    killall xray
-}
-EOF
-
-          chmod 755 files/etc/init.d/xray
-
       - name: Build firmware
         run: |
           cd openwrt-imagebuilder-23.05.5-ath79-generic.Linux-x86_64
+          make image PROFILE="tplink_archer-c6-v2" PACKAGES="pbr kmod-tun iptables-nft ca-bundle" FILES="../files"
 
-          make image \
-          PROFILE="tplink_archer-c6-v2" \
-          PACKAGES="pbr kmod-tun iptables-nft ca-bundle" \
-          FILES="../files"
-
-      - name: Find firmware
+      - name: Search firmware
         run: |
           find . -name "*sysupgrade.bin"
 
@@ -60,5 +35,4 @@ EOF
         uses: actions/upload-artifact@v4
         with:
           name: Archer-A6-VLESS-MIPS
-          path: |
-            **/*sysupgrade.bin
+          path: "**/*sysupgrade.bin"
