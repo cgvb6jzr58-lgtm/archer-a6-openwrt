@@ -8,6 +8,7 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
+
       - name: Download ImageBuilder
         run: |
           wget https://downloads.openwrt.org/releases/23.05.5/targets/ath79/generic/openwrt-imagebuilder-23.05.5-ath79-generic.Linux-x86_64.tar.xz
@@ -16,15 +17,19 @@ jobs:
       - name: Build firmware
         run: |
           cd openwrt-imagebuilder-23.05.5-ath79-generic.Linux-x86_64
-          make image PROFILE="tplink_archer-c6-v2" PACKAGES="luci luci-ssl xray-core pbr luci-app-pbr dnsmasq-full -dnsmasq ca-bundle curl nano ip-full"
 
-      - name: Find firmware files
+          make image \
+          PROFILE="tplink_archer-c6-v2" \
+          PACKAGES="luci luci-ssl xray-core pbr luci-app-pbr dnsmasq-full -dnsmasq ca-bundle curl nano ip-full"
+
+      - name: Show generated files
         run: |
-          find . -type f \( -name "*.bin" -o -name "*.img" \)
+          echo "Searching firmware..."
+          find openwrt-imagebuilder-23.05.5-ath79-generic.Linux-x86_64/bin/targets/ath79/generic/ -type f
 
       - name: Upload firmware
         uses: actions/upload-artifact@v4
         with:
           name: Archer-A6-OpenWrt
           path: |
-            **/*.bin
+            openwrt-imagebuilder-23.05.5-ath79-generic.Linux-x86_64/bin/targets/ath79/generic/*squashfs-sysupgrade.bin
